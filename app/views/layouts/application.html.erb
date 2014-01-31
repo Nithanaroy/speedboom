@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Speedboom</title>
+  <%= stylesheet_link_tag    "application", media: "all", "data-turbolinks-track" => true %>
+  <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
+  <%= csrf_meta_tags %>
+</head>
+<body>
+
+
+<div class='container' style='padding-bottom: 20px;'>
+	<div class="page-header">
+	  <h1 style='text-align:center;'>SpeedBoom</h1>
+	</div>
+	<%= yield %>
+</div>
+
+</body>
+</html>

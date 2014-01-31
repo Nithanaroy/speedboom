@@ -1,0 +1,21 @@
+.center {
+	text-align: center;
+}
+
+.progress {
+	margin-bottom: 10px;
+}
+
+.progress:hover {
+	cursor: pointer;
+}
+
+a.refresh:hover {
+	background: none;
+	color: #000;
+	text-decoration: none;
+}
+
+#notice {
+	text-align: center;
+}
