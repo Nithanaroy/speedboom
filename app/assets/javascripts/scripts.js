@@ -76,8 +76,12 @@ $(function () {
 			data: $(this).serialize(),
 			success: function (data) {
 				change_notice_bar(data['msg'], data['css_class']);
-				if(data['state-change'])
-					change_state('running');
+				if(data['state-change']) {
+					if (current_state == 'stopped')
+						change_state('running');
+					else
+						change_state('stopped');
+				}
 			},
 			error: function (data) {
 				change_notice_bar(data['msg'], data['css_class']);

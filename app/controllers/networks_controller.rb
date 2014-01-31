@@ -6,7 +6,8 @@ class NetworksController < ApplicationController
   # GET /networks.json
   def index
     cmd = `cd ../dispatch-proxy/bin; node dispatch.js list`
-    @networks = JSON.parse(cmd)
+    @networks = JSON.parse(cmd).select { |network|  network['address'] =~ /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/  }
+    # @networks.each { |n| puts "#{n}" }
     # @networks = Network.all
   end
 
