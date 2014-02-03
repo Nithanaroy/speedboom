@@ -23,7 +23,7 @@
       <% @networks.each_with_index do |network, index| %>
         <tr>
           <td class='center'>(<%= index + 1 %>)</td>
-          <td><%= network['name'] %></td>
+          <td><%= network['full_name'] %> </td>
           <td><%= network['address'] %></td>
           <td style='width: 75px;'>
             <div class="progress">

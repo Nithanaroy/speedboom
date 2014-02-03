@@ -10,9 +10,16 @@
 
 
 <div class='container' style='padding-bottom: 20px;'>
-	<div class="page-header">
-	  <h1 style='text-align:center;'>SpeedBoom</h1>
-	</div>
+	<!-- <div class="page-header center">
+	  <img src="logo.png" alt='SpeedBoom' style='height: 80px;' />
+	</div> -->
+	  <h1 class='center' style='font-family:Zapfino; font-size:72px; margin-bottom: -65px; line-height: normal;'>SpeedBoom</h1>
+	  <div class="progress boom_start">
+		<div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+			<span class="sr-only">60% Complete</span>
+		</div>
+	  </div>
+
 	<%= yield %>
 </div>
 

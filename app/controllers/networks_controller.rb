@@ -6,9 +6,23 @@ class NetworksController < ApplicationController
   # GET /networks.json
   def index
     cmd = `cd ../dispatch-proxy/bin; node dispatch.js list`
-    @networks = JSON.parse(cmd).select { |network|  network['address'] =~ /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/  }
+    @networks = JSON.parse(cmd).select { |network|  network['address'] =~ /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/ } - [{"name"=>"lo0", "address"=>"127.0.0.1"}]
     # @networks.each { |n| puts "#{n}" }
-    # @networks = Network.all
+
+    all_network_services = `networksetup -listallnetworkservices `.to_s.split(/\r?\n/)[1..-1] # Ignore the first line which describes about the command
+    # puts "All Services #{all_network_services}"
+    
+    all_network_services_info = all_network_services.collect do |service| 
+      info_command = "networksetup -getinfo '#{service}'"
+      info = `#{info_command}`.to_s.split(/\r?\n/)
+      info.each_with_object({'name' => service}) { |str, hash| key_value = str.split(':', 2); hash[key_value.first] = key_value.last.strip }
+    end
+    # puts "All Services Info #{all_network_services_info}"
+
+    @networks.each do |network|
+      matching_network = all_network_services_info.find { |n| n['IP address'] == network['address'] }
+      network['full_name'] = matching_network ? matching_network['name'] : network['name']
+    end
   end
 
   # GET /networks/1
@@ -33,8 +47,8 @@ class NetworksController < ApplicationController
       puts "Executing command: #{cmd}"
       cmd_result = system(cmd)
       if cmd_result
-        @@pid = (`ps -e | grep "node dispatch.j[s]"`).split(' ').first
-        puts "Created process with PID: #{@@pid}"
+        @@pid = (`ps -e | grep "node dispatch.j[s]"`).split(/\r?\n/).collect{ |p| p.split(' ').first.to_i }
+        puts "Created process(es) with PID: #{@@pid} for my PID: #{Process.pid}"
         cmd = 'networksetup -setwebproxy "Wi-Fi" localhost 8080' # TODO : Wifi Connection is a must
         cmd_result = system(cmd)
         if cmd_result
@@ -60,21 +74,23 @@ class NetworksController < ApplicationController
       render :json => {'msg' => 'Hmmm... guess what those On / Off button do??', 'css_class' => 'alert-info', 'state-change' => false}
       return  
     end
-    cmd = "kill -SIGINT #{@@pid} &"
+    begin
+      cmd_result = Process.fork { exec('cd lib/tasks; ruby kill_dispatch_processes.rb') }
+      # cmd = system()
+      # @@pid.each { |p| Process.detach(p) }
+      # Process.kill("HUP", @@pid.last)
+      # @@pid.each { |p| Process.kill("HUP", p) }
+
+    rescue Exception => e
+      puts "Exception:: #{e.inspect}" #ignore the error
+    end
+    cmd = 'networksetup -setwebproxystate "Wi-Fi" off'
     cmd_result = system(cmd)
-    cmd_result = true
     if cmd_result
-      cmd = 'networksetup -setwebproxystate "Wi-Fi" off'
-      cmd_result = system(cmd)
-      if cmd_result
-        render :json => {'msg' => 'SpeedBoom stopped successfully. Try again soon!', 'css_class' => 'alert-info', 'state-change' => true}
-        return  
-      else
-        render :json => {'msg' => 'SpeedBoom stopped but couldn\'t set WiFi network connection to No Proxy. Please do it manually.', 'css_class' => 'alert-danger', 'state-change' => true}
-        return
-      end
+      render :json => {'msg' => 'SpeedBoom stopped successfully. Try again soon!', 'css_class' => 'alert-info', 'state-change' => true}
+      return  
     else
-      render :json => {'msg' => "Error stopping SpeedBoom. Please close dispatcher [#{@@pid}] manually!", 'css_class' => 'alert-danger', 'state-change' => true}
+      render :json => {'msg' => 'SpeedBoom stopped but couldn\'t set WiFi network connection to No Proxy. Please do it manually.', 'css_class' => 'alert-danger', 'state-change' => true}
       return
     end
   end

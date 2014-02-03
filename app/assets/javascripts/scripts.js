@@ -31,13 +31,13 @@ $(function () {
 	});
 
 	function clear_all_progress_bars () {
-		$('div.progress div.progress-bar').each(function () {
+		$('form div.progress div.progress-bar').each(function () {
 			set_progress_bar(this, 0);
 		});
 	}
 
 	function fill_all_progress_bars () {
-		$('div.progress div.progress-bar').each(function () {
+		$('form div.progress div.progress-bar').each(function () {
 			set_progress_bar(this, "100%");
 		});	
 	}
@@ -69,6 +69,7 @@ $(function () {
 
 	$("form.ajax").submit(function(event) {
 		event.preventDefault();
+		$(".boom_start .progress-bar").width(0);
 		var url = (current_state == 'stopped') ? '/networks/dispatch' : '/networks/stop';
 		$.ajax({
 			url: url,
@@ -88,6 +89,9 @@ $(function () {
 				console.log(data);
 				if(data['state-change'])
 					change_state('stopped');
+			},
+			complete: function (data) {
+				$(".boom_start").css({display: 'block'}).children('.progress-bar').width('100%');
 			}
 		});
 	});
